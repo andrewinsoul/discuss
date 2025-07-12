@@ -1,0 +1,19 @@
+<.form for={@form} action={~p"/topics/#{@topic.id}"} method="put" class="flex flex-col items-center">
+    <div class="text-sm w-full">
+      <.input 
+        field={@form[:title]} 
+        type="text" 
+        placeholder="Enter Topic Title" 
+        maxlength="150"
+        class="rounded-lg w-full focus:border-2 border-gray-200 border focus:border-blue-600"
+      />
+      
+    </div>
+  
+    <.button 
+      type="submit"
+      class="text-sm px-6 py-2 hover:font-bold rounded-md mt-6 !bg-blue-600 text-white w-[200px]"
+    >
+      Update Topic
+    </.button>
+  </.form>
