@@ -48,4 +48,22 @@ defmodule DiscussWeb.TopicController do
         render(conn, :edit, form: to_form(changeset), topic: old_topic)
     end
   end
+
+  def delete_topic(conn, %{"id" => topic_id}) do
+    with %Topic{} = topic <- Repo.get(Topic, topic_id),
+         {:ok, _} <- Repo.delete(topic) do
+      conn
+      |> put_flash(:info, "Topic deleted successfully.")
+      |> redirect(to: ~p"/")
+    else
+      nil ->
+        conn
+        |> put_flash(:info, "Topic not found!")
+        |> redirect(to: ~p"/")
+      _ ->
+        conn
+        |> put_flash(:error, "Error in deleting topic!")
+        |> redirect(to: ~p"/")
+    end
+  end
 end
