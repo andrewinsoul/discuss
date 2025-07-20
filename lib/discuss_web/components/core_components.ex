@@ -106,12 +106,10 @@ defmodule DiscussWeb.CoreComponents do
       </.custom_modal>
 
   """
-  # attr :id, :string, required: true
-  # attr :show, :boolean, default: false
-  # attr :on_cancel, JS, default: %JS{}
   slot :modal_header, required: true
   slot :cancel_modal_button_text
   slot :confirm_modal_button_text
+  attr :confirm_click, :string, required: true
 
   def custom_modal(assigns) do
     ~H"""
@@ -139,6 +137,7 @@ defmodule DiscussWeb.CoreComponents do
           </button>
           <button
             class="rounded-sm py-1 px-3 text-center border border-red-400 bg-red-400 text-white"
+            onclick={@confirm_click}
             title="handle confirm operation"
             id="handleConfirm"
             type="button"

@@ -37,6 +37,11 @@ topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" });
 window.addEventListener("phx:page-loading-start", (_info) => topbar.show(300));
 window.addEventListener("phx:page-loading-stop", (_info) => topbar.hide());
 
+window.deleteTopic = () => {
+  document.getElementById(`delete-topic-form-${currentTopicId}`).submit();
+  document.getElementById("confirm-modal").style.display = "none";
+}
+
 document.addEventListener("click", function (event) {
   if (event.target.closest(".confirm-delete")) {
     let button = event.target.closest(".confirm-delete");
@@ -53,9 +58,6 @@ document.addEventListener("click", function (event) {
     event.target.className.includes("close")
   ) {
     document.getElementById("confirmModal").style.display = "none";
-  } else if (event.target.id === "handleConfirm") {
-    document.getElementById(`delete-topic-form-${currentTopicId}`).submit();
-    document.getElementById("confirm-modal").style.display = "none";
   }
 });
 
