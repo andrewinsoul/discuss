@@ -90,6 +90,68 @@ defmodule DiscussWeb.CoreComponents do
   end
 
   @doc """
+  Renders my custom modal.
+
+  ## Examples
+
+      <.custom_modal id="confirm-modal">
+        This is a modal.
+      </.custom_modal>
+
+  JS commands may be passed to the `:on_cancel` to configure
+  the closing/cancel event, for example:
+
+      <.custom_modal id="confirm" on_cancel={JS.navigate(~p"/posts")}>
+        This is another modal.
+      </.custom_modal>
+
+  """
+  # attr :id, :string, required: true
+  # attr :show, :boolean, default: false
+  # attr :on_cancel, JS, default: %JS{}
+  slot :modal_header, required: true
+  slot :cancel_modal_button_text
+  slot :confirm_modal_button_text
+
+  def custom_modal(assigns) do
+    ~H"""
+    <div id="confirmModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="flex justify-between px-[4px] border-b border-b-gray-300">
+          <div class="flex gap-2 items-center">
+            <.icon name="hero-exclamation-triangle" class="h-8 w-8 font-bold text-blue-400" />
+            <p class="text-blue-400 font-bold"><%= render_slot(@modal_header) %></p>
+          </div>
+
+          <span class="close text-[28px] text-gray-400 cursor-pointer">&times;</span>
+        </div>
+        <div class="flex justify-center my-8">
+          <p id="modal-question" class="text-gray-500"></p>
+        </div>
+        <div class="flex justify-center mb-3 gap-3">
+          <button
+            class="rounded-sm py-1 px-3 text-center border border-gray-400"
+            title="cancel operation"
+            id="handleCancel"
+            type="button"
+          >
+            <%= render_slot(@cancel_modal_button_text) || "Cancel" %>
+          </button>
+          <button
+            class="rounded-sm py-1 px-3 text-center border border-red-400 bg-red-400 text-white"
+            title="handle confirm operation"
+            id="handleConfirm"
+            type="button"
+          >
+            <%= render_slot(@confirm_modal_button_text) || "Delete" %>
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
   Renders flash notices.
 
   ## Examples

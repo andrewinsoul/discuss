@@ -3,21 +3,37 @@
 <ul class="border border-gray-300 rounded-md">
     <%= for topic <- @topics do %>
         <li class="border-b p-2 border-gray-300 last:border-b-0 flex justify-between">
-            <span><%= topic.title %></span>
+            <span>
+                <%= topic.title %>
+            </span>
             <div class="flex gap-5">
-                <%= link to: ~p"/topics/#{topic.id}/edit", class: "w-full h-full flex justify-center items-center cursor-pointer" do %>
+                <%= link to: ~p"/topics/#{topic.id}/edit",
+                    class: "w-full h-full flex justify-center items-center cursor-pointer" do %>
                     <.icon name="hero-pencil" class="h-4 w-4 font-bold text-blue-500" />
-                <% end %>
-                <%= link to: ~p"/topics/new", class: "w-full h-full flex justify-center items-center cursor-pointer" do %>
-                    <.icon name="hero-trash" class="h-4 w-4 font-bold text-red-500" />
-                <% end %>
+                    <% end %>
+                        <button title="confirm delete operation" id={"confirmDelete - #{topic.title} - #{topic.id}"}
+                            type="button"
+                            class="w-full h-full flex justify-center confirm-delete items-center cursor-pointer">
+                            <.icon name="hero-trash" class="h-4 w-4 font-bold text-red-500" />
+                        </button>
             </div>
+            <form class="hidden" id={"delete-topic-form-#{topic.id}"} method="POST" action={~p"/topics/#{topic.id}"}>
+                <input type="hidden" name="_method" value="DELETE" />
+                <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+            </form>
         </li>
-    <% end %>
+        <% end %>
 </ul>
 
 <div class="fixed bottom-10 right-10 w-[50px] h-[50px] bg-red-500 rounded-full shadow-md">
     <%= link to: ~p"/topics/new", class: "w-full h-full flex justify-center items-center cursor-pointer" do %>
         <.icon name="hero-plus" class="h-8 w-8 font-bold text-white" />
-    <% end %>
+        <% end %>
 </div>
+
+<!-- Modal Component -->
+<.custom_modal>
+    <:modal_header>
+        Delete Topic?
+    </:modal_header>
+</.custom_modal>
