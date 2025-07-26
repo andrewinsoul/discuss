@@ -42,6 +42,8 @@ defmodule Discuss.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_html_helpers, "~> 1.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:ueberauth_github, "~> 0.8"},
+      {:ueberauth, "~> 0.10"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:heroicons,
