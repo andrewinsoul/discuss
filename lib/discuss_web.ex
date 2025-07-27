@@ -44,6 +44,7 @@ defmodule DiscussWeb do
 
       import Plug.Conn
       import DiscussWeb.Gettext
+      import Ecto.Query
       alias DiscussWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="[scrollbar-gutter:stable]">
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,11 +9,30 @@
       <%= assigns[:page_title] || "Discuss" %>
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
+
   <body class="bg-white antialiased">
-    <nav class="bg-blue-600 py-6 pl-36 text-2xl text-white font-mono">DISCUSSIONS</nav>
+    <nav class="bg-blue-600 py-3 text-2xl text-white font-mono flex justify-around items-center">
+      <p class="hidden lg:block lg:invisible">Invisible Text</p>
+      <a href="/" class="no-underline text-base lg:text-2xl font-bold"> DISCUSSIONS </a>
+      <div>
+        <%= if @conn.assigns[:user] do %>
+          <a href="/auth/logout" class="flex items-center gap-2 border border-gray-300 p-1 lg:p-3 rounded-md">
+            <i data-lucide="log-out" class="w-5 h-5 text-gray-200"></i>
+            <span class="text-[9px] lg:text-sm">Log Out</span>
+          </a>
+          <% else %>
+            <a href="/auth/github" class="flex items-center gap-2 border border-gray-300 p-1 lg:p-3 rounded-md">
+              <i data-lucide="github" class="w-5 h-5 text-gray-200"></i>
+              <span class="text-[9px] lg:text-sm">Sign in With Github</span>
+            </a>
+            <% end %>
+      </div>
+    </nav>
     <%= @inner_content %>
   </body>
+
 </html>

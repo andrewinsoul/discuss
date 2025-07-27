@@ -1,9 +1,9 @@
-<h2 class="text-lg text-gray-700 font-bold mb-4">Topics</h2>
+<h2 class="text-lg text-gray-700 font-bold mb-4 ml-4 lg:ml-0">Topics</h2>
 
-<ul class="border border-gray-300 rounded-md">
+<ul class="border border-gray-300 rounded-md text-xs w-[94%] lg:w-full mx-auto lg:mx-0 lg:text-base">
     <%= for topic <- @topics do %>
-        <li class="border-b p-2 border-gray-300 last:border-b-0 flex justify-between">
-            <span>
+        <li class="border-b p-2 border-gray-300 last:border-b-0 flex justify-between items-center">
+            <span class="w-[80%] lg:w-[90%] overflow-hidden text-ellipsis text-nowrap">
                 <%= topic.title %>
             </span>
             <div class="flex gap-5">

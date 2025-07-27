@@ -1,4 +1,5 @@
 defmodule DiscussWeb.Router do
+  alias DiscussWeb.Plugs.SetUser
   use DiscussWeb, :router
 
   pipeline :browser do
@@ -8,6 +9,7 @@ defmodule DiscussWeb.Router do
     plug :put_root_layout, html: {DiscussWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug SetUser
   end
 
   pipeline :api do
@@ -23,6 +25,14 @@ defmodule DiscussWeb.Router do
     get "/topics/:id/edit", TopicController, :edit
     put "/topics/:id", TopicController, :edit_topic
     delete "/topics/:id", TopicController, :delete_topic
+  end
+
+  scope "/auth", DiscussWeb do
+    pipe_through :browser
+
+    get "/logout", AuthController, :logout
+    get "/:idp", AuthController, :request
+    get "/:idp/callback", AuthController, :callback
   end
 
   # Other scopes may use custom stacks.
