@@ -4,6 +4,9 @@ defmodule DiscussWeb.TopicController do
   alias Discuss.Topics.Topic
   import Phoenix.Component, only: [to_form: 1]
 
+  plug DiscussWeb.Plugs.RequireAuth
+       when action in [:new, :create_topic, :edit, :edit_topic, :delete_topic]
+
   def index(conn, _params) do
     topics = Repo.all(Topic)
     render(conn, :index, topics: topics)
@@ -60,6 +63,7 @@ defmodule DiscussWeb.TopicController do
         conn
         |> put_flash(:info, "Topic not found!")
         |> redirect(to: ~p"/")
+
       _ ->
         conn
         |> put_flash(:error, "Error in deleting topic!")
