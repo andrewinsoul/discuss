@@ -7,6 +7,9 @@ defmodule DiscussWeb.TopicController do
   plug DiscussWeb.Plugs.RequireAuth
        when action in [:new, :create_topic, :edit, :edit_topic, :delete_topic]
 
+  plug DiscussWeb.Plugs.CheckTopicOwner
+       when action in [:edit, :edit_topic, :delete_topic]
+
   def index(conn, _params) do
     topics = Repo.all(Topic)
     render(conn, :index, topics: topics)
@@ -18,8 +21,10 @@ defmodule DiscussWeb.TopicController do
     render(conn, :new, form: to_form(changeset))
   end
 
-  def create_topic(conn, %{"topic" => title}) do
-    changeset = Topic.changeset(%Topic{}, title)
+  def create_topic(conn, %{"topic" => topic_payload}) do
+    changeset =
+      Ecto.build_assoc(conn.assigns.user, :topics)
+      |> Topic.changeset(topic_payload)
 
     case Repo.insert(changeset) do
       {:ok, _topic} ->
