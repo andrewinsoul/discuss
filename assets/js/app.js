@@ -34,7 +34,6 @@ let currentTopicId = null;
 
 lucide.createIcons();
 
-
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" });
 window.addEventListener("phx:page-loading-start", (_info) => topbar.show(300));
@@ -43,12 +42,13 @@ window.addEventListener("phx:page-loading-stop", (_info) => topbar.hide());
 window.deleteTopic = () => {
   document.getElementById(`delete-topic-form-${currentTopicId}`).submit();
   document.getElementById("confirm-modal").style.display = "none";
-}
+};
 
 document.addEventListener("click", function (event) {
   if (event.target.closest(".confirm-delete")) {
     let button = event.target.closest(".confirm-delete");
-    const [_, topicName, topicId] = button.id.split(" - ");
+    const topicName = button.dataset.title;
+    const topicId = button.id;
     currentTopicId = topicId;
 
     document.getElementById(

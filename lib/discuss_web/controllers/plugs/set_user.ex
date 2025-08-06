@@ -1,5 +1,5 @@
 defmodule DiscussWeb.Plugs.SetUser do
-  alias Discuss.Topics.User
+  alias Discuss.Users.User
   alias Discuss.Repo
   import Plug.Conn
 

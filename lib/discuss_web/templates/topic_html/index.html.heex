@@ -6,15 +6,15 @@
             <span class="w-[80%] lg:w-[90%] overflow-hidden text-ellipsis text-nowrap">
                 <%= topic.title %>
             </span>
-            <%= if @conn.assigns[:user] do %>
+            <%= if @conn.assigns.user && @conn.assigns.user.id == topic.user_id do %>
                 <div>
                     <div class="flex gap-5">
                         <%= link to: ~p"/topics/#{topic.id}/edit",
                             class: "w-full h-full flex justify-center items-center cursor-pointer" do %>
                             <.icon name="hero-pencil" class="h-4 w-4 font-bold text-blue-500" />
                             <% end %>
-                                <button title="confirm delete operation" id={"confirmDelete - #{topic.title} -
-                                    #{topic.id}"} type="button"
+                                <button data-title={topic.title} title="confirm delete operation" id={"#{topic.id}"}
+                                    type="button"
                                     class="w-full h-full flex justify-center confirm-delete items-center cursor-pointer">
                                     <.icon name="hero-trash" class="h-4 w-4 font-bold text-red-500" />
                                 </button>

@@ -1,4 +1,4 @@
-defmodule Discuss.Topics.User do
+defmodule Discuss.Users.User do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -7,6 +7,8 @@ defmodule Discuss.Topics.User do
     field :email, :string
     field :provider, :string
     field :token, :string
+
+    has_many :topics, Discuss.Topics.Topic
 
     timestamps()
   end
