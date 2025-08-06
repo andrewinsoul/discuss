@@ -4,9 +4,11 @@
     <%= for topic <- @topics do %>
         <li class="border-b p-2 border-gray-300 last:border-b-0 flex justify-between items-center">
             <span class="w-[80%] lg:w-[90%] overflow-hidden text-ellipsis text-nowrap">
-                <%= topic.title %>
+
+                <%= link topic.title, to: ~p"/topics/#{topic.id}",
+                    class: "hover:underline hover:text-blue-600 hover:font-bold" %>
             </span>
-            <%= if @conn.assigns.user && @conn.assigns.user.id == topic.user_id do %>
+            <%= if @conn.assigns.user && @conn.assigns.user.id==topic.user_id do %>
                 <div>
                     <div class="flex gap-5">
                         <%= link to: ~p"/topics/#{topic.id}/edit",
