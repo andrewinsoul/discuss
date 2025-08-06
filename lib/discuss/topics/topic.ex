@@ -6,6 +6,7 @@ defmodule Discuss.Topics.Topic do
     field :title, :string
 
     belongs_to :user, Discuss.Users.User
+    has_many :comments, Discuss.Comments.Comment
   end
 
   def changeset(struct, params \\ %{}) do
