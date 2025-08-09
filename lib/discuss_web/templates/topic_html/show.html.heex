@@ -1,1 +1,15 @@
-<%= @topic.title %>
+<h5 class="font-bold text-2xl mb-4">
+    <%= @topic.title %>
+</h5>
+<div>
+    <textarea class="w-full border-gray-300 rounded-md p-3" placeholder="Write your comment..."></textarea>
+</div>
+<.button id="add-comment-btn">
+    Create Comment
+</.button>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        window.createSocket(<%= @topic.id %>)
+
+    })
+</script>

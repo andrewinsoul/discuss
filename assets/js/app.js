@@ -21,6 +21,11 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
+import { createIcons, icons } from "lucide";
+
+document.addEventListener("DOMContentLoaded", () => {
+  createIcons({ icons });
+});
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -31,8 +36,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
 });
 
 let currentTopicId = null;
-
-lucide.createIcons();
+let socket = new Socket("/socket", { params: { token: window.userToken } });
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" });
@@ -66,9 +70,29 @@ document.addEventListener("click", function (event) {
 
 // connect if there are any LiveViews on the page
 liveSocket.connect();
+socket.connect();
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
+
+const createSocket = (topicId) => {
+  const channel = socket.channel(`comment:${topicId}`, {});
+  channel
+    .join()
+    .receive("ok", (resp) => {
+      console.log("Joined successfully", resp);
+    })
+    .receive("error", (resp) => {
+      console.log("Unable to join", resp);
+    });
+
+  document.getElementById("add-comment-btn").addEventListener("click", () => {
+    const content = document.querySelector("textarea").value;
+    channel.push("comment:add", { content: content });
+  });
+};
+
+window.createSocket = createSocket;
