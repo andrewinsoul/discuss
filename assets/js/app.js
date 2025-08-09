@@ -88,6 +88,11 @@ const createSocket = (topicId) => {
     .receive("error", (resp) => {
       console.log("Unable to join", resp);
     });
+
+  document.getElementById("add-comment-btn").addEventListener("click", () => {
+    const content = document.querySelector("textarea").value;
+    channel.push("comment:add", { content: content });
+  });
 };
 
 window.createSocket = createSocket;

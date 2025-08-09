@@ -1,15 +1,25 @@
 defmodule DiscussWeb.CommentChannel do
+  alias Discuss.Repo
+  alias Discuss.Topics.Topic
   use DiscussWeb, :channel
 
   @impl true
-  def join(name, payload, socket) do
-    IO.puts("+++++++")
-    IO.puts(name)
+  def join("comment:" <> topic_id, payload, socket) do
+    IO.puts("+++++++++++ #{topic_id}")
+    topic_id = String.to_integer(topic_id)
+    topic = Repo.get(Topic, topic_id)
+
     if authorized?(payload) do
-      {:ok, %{name: "Andrew"}, socket}
+      {:ok, %{"id" => topic.id, "title" => topic.title}, socket}
     else
       {:error, %{reason: "unauthorized"}}
     end
+  end
+
+  @impl true
+  def handle_in("comment:add", payload, socket) do
+    IO.inspect(payload)
+    {:reply, {:ok, payload}, socket}
   end
 
   # Channels can be used in a request/response fashion
@@ -23,6 +33,7 @@ defmodule DiscussWeb.CommentChannel do
   # broadcast to everyone in the current topic (comment:lobby).
   @impl true
   def handle_in("shout", payload, socket) do
+    IO.inspect(payload)
     broadcast(socket, "shout", payload)
     {:noreply, socket}
   end
