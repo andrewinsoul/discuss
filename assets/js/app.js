@@ -31,6 +31,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
 });
 
 let currentTopicId = null;
+let socket = new Socket("/socket", {params: {token: window.userToken}})
 
 lucide.createIcons();
 
@@ -66,10 +67,14 @@ document.addEventListener("click", function (event) {
 
 // connect if there are any LiveViews on the page
 liveSocket.connect();
+socket.connect()
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
-import socket from "./user_socket";
+let channel = socket.channel("comment:1", {})
+channel.join()
+  .receive("ok", resp => { console.log("Joined successfully", resp) })
+  .receive("error", resp => { console.log("Unable to join", resp) })
