@@ -7,6 +7,9 @@
 <.button id="add-comment-btn">
     Create Comment
 </.button>
+
+<ul id="comment-list" class="mt-8 h-[450px] overflow-y-auto">
+</ul>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         window.createSocket(<%= @topic.id %>)

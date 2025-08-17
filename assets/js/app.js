@@ -22,10 +22,16 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 import { createIcons, icons } from "lucide";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import advancedFormat from "dayjs/plugin/advancedFormat";
 
 document.addEventListener("DOMContentLoaded", () => {
   createIcons({ icons });
 });
+
+dayjs.extend(relativeTime);
+dayjs.extend(advancedFormat)
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -78,12 +84,23 @@ socket.connect();
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
 
+const checkIsOlderThanWeek = (date) => {
+  const now = dayjs();
+  return now.diff(date, "week") >= 1;
+};
+
+const formatDateCommentWasCreated = (date) => {
+  return checkIsOlderThanWeek(date)
+    ? dayjs(date).format("Do MMMM, YYYY HH:mm")
+    : dayjs(date).fromNow();
+};
+
 const createSocket = (topicId) => {
   const channel = socket.channel(`comment:${topicId}`, {});
   channel
     .join()
     .receive("ok", (resp) => {
-      console.log("Joined successfully", resp);
+      renderCommentArray(resp.comments);
     })
     .receive("error", (resp) => {
       console.log("Unable to join", resp);
@@ -93,6 +110,32 @@ const createSocket = (topicId) => {
     const content = document.querySelector("textarea").value;
     channel.push("comment:add", { content: content });
   });
+
+  channel.on(`comment:${topicId}:new`, (response) => {
+    const dateCommentWasCreated = formatDateCommentWasCreated(
+      response.comment.inserted_at
+    );
+    document.querySelector("textarea").value = ""
+    document.getElementById("comment-list").innerHTML += `
+    <li class="mb-4">
+      <p>${response.comment.content}</p>
+      <p class="text-xs text-gray-400">${dateCommentWasCreated}</p>
+    </li>`;
+  });
 };
+
+function renderCommentArray(commentArray) {
+  const renderedComments = commentArray.map((comment) => {
+    const dateCommentWasCreated = formatDateCommentWasCreated(
+      comment.inserted_at
+    );
+    return `
+    <li class="mb-4">
+      <p>${comment.content}</p>
+      <p class="text-xs text-gray-400">${dateCommentWasCreated}</p>
+    </li>`;
+  });
+  document.getElementById("comment-list").innerHTML = renderedComments.join("");
+}
 
 window.createSocket = createSocket;

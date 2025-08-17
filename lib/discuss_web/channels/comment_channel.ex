@@ -1,25 +1,34 @@
 defmodule DiscussWeb.CommentChannel do
+  alias Discuss.Comments.Comment
   alias Discuss.Repo
   alias Discuss.Topics.Topic
   use DiscussWeb, :channel
 
   @impl true
   def join("comment:" <> topic_id, payload, socket) do
-    IO.puts("+++++++++++ #{topic_id}")
     topic_id = String.to_integer(topic_id)
-    topic = Repo.get(Topic, topic_id)
+    topic = Repo.get(Topic, topic_id) |> Repo.preload(:comments)
 
     if authorized?(payload) do
-      {:ok, %{"id" => topic.id, "title" => topic.title}, socket}
+      {:ok, %{comments: topic.comments}, assign(socket, :topic, topic)}
     else
       {:error, %{reason: "unauthorized"}}
     end
   end
 
   @impl true
-  def handle_in("comment:add", payload, socket) do
-    IO.inspect(payload)
-    {:reply, {:ok, payload}, socket}
+  def handle_in("comment:add", %{"content" => content}, socket) do
+    topic = socket.assigns.topic
+    changeset = topic |> Ecto.build_assoc(:comments) |> Comment.changeset(%{content: content})
+
+    case Repo.insert(changeset) do
+      {:ok, comment} ->
+        broadcast!(socket, "comment:#{topic.id}:new", %{comment: comment})
+        {:reply, :ok, socket}
+
+      {:error, _reason} ->
+        {:reply, {:error, %{errors: changeset}}, socket}
+    end
   end
 
   # Channels can be used in a request/response fashion
