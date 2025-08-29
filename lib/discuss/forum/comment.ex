@@ -5,6 +5,9 @@ defmodule Discuss.Forum.Comment do
   schema "comments" do
     field :content, :string
 
+    belongs_to :user, Discuss.Account.User
+    belongs_to :topic, Discuss.Forum.Topic
+
     timestamps(type: :utc_datetime)
   end
 
