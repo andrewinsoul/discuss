@@ -4,7 +4,7 @@ defmodule DiscussWeb.AuthController do
   # Invoke all controller specific functionalities via code injection (Macros)
   use DiscussWeb, :controller
 
-  plug Ueberauth
+  plug Ueberauth when action in [:request, :callback]
 
   # A plug from the ueberauth dependency that handles request and callback phases of the OAuth flow
 
