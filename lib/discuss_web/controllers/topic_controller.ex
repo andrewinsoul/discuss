@@ -4,9 +4,17 @@ defmodule DiscussWeb.TopicController do
   alias Discuss.Forum
   alias Discuss.Forum.Topic
 
-  def index(conn, _params) do
-    topics = Forum.list_topics()
-    render(conn, :index, topics: topics)
+  def index(conn, params) do
+
+    %{
+      items: topics,
+      next_cursor: next_cursor,
+      prev_cursor: prev_cursor,
+      page_size: page_size
+    } =
+      Forum.list_topics(after: params["after"], before: params["before"])
+
+    render(conn, :index, topics: topics, next_cursor: next_cursor, prev_cursor: prev_cursor)
   end
 
   def new(conn, _params) do
