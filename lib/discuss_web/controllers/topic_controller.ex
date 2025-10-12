@@ -71,6 +71,6 @@ defmodule DiscussWeb.TopicController do
 
     conn
     |> put_flash(:info, "Topic deleted successfully.")
-    |> redirect(to: ~p"/topics")
+    |> redirect(to: ~p"/")
   end
 end
