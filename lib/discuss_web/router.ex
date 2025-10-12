@@ -14,6 +14,14 @@ defmodule DiscussWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/auth", DiscussWeb do
+    pipe_through :browser
+
+    # a route param called idp which can be any IDP your app supports
+    get "/:idp", AuthController, :request
+    get "/:idp/callback", AuthController, :callback
+  end
+
   scope "/", DiscussWeb do
     pipe_through :browser
 

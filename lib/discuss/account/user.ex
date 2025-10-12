@@ -17,7 +17,7 @@ defmodule Discuss.Account.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :email, :provider])
+    |> cast(attrs, [:username, :email, :provider, :token])
     |> validate_required([:username, :email, :provider, :token])
     |> unique_constraint(:email)
     |> unique_constraint(:username)
