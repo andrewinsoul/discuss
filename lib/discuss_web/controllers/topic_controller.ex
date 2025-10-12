@@ -15,11 +15,18 @@ defmodule DiscussWeb.TopicController do
   end
 
   def create(conn, %{"topic" => topic_params}) do
-    case Forum.create_topic(topic_params) do
+    user = conn.assigns[:user]
+
+    case Forum.create_topic(
+      %{
+        title: topic_params["title"]
+      },
+      user
+    ) do
       {:ok, topic} ->
         conn
         |> put_flash(:info, "Topic created successfully.")
-        |> redirect(to: ~p"/topics/#{topic}")
+        |> redirect(to: ~p"/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)
