@@ -6,7 +6,15 @@ defmodule DiscussWeb.AuthController do
 
   plug Ueberauth when action in [:request, :callback]
 
-  # A plug from the ueberauth dependency that handles request and callback phases of the OAuth flow
+  def request(conn, _params), do: conn
+
+  def logout(conn, _params) do
+    conn
+    |> clear_session()
+    |> configure_session(renew: true)
+    |> put_flash(:info, "Logged out successfully")
+    |> redirect(to: ~p"/")
+  end
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"idp" => provider} = _params) do
     user_params = %{

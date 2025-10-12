@@ -23,6 +23,29 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
   </head>
   <body class="bg-white antialiased">
+    <%= if info = get(@flash, :info) do %>
+      <.flash id="auth-msg" message={info} kind={:info} />
+    <% end %>
+
+    <%= if error = get(@flash, :error) do %>
+      <.flash message={error} kind={:error} />
+    <% end %>
+
     <%= @inner_content %>
+    <script>
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest) return;
+        const btn = e.target.closest(".flash-close");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-target");
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        // Optional: small fade/slide before removal
+        el.setAttribute("data-hide", "true");
+        setTimeout(() => el.remove(), 160);
+      });
+    </script>
   </body>
 </html>
