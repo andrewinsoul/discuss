@@ -87,6 +87,7 @@ defmodule DiscussWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import DiscussWeb.CoreComponents, except: [flash: 1, flash_group: 1]
+      import DiscussWeb.ModalComponent
       import DiscussWeb.Gettext
 
       # Shortcut for generating JS commands

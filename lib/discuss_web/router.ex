@@ -33,6 +33,7 @@ defmodule DiscussWeb.Router do
     post "/topics/new", TopicController, :create
     get "/topics/:id/edit", TopicController, :edit
     put "/topics/:id", TopicController, :update
+    delete "/topics/:id", TopicController, :delete
   end
 
   # Other scopes may use custom stacks.
