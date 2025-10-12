@@ -1,13 +1,15 @@
 defmodule DiscussWeb.Router do
+  alias DiscussWeb.Plugs.SetUser
   use DiscussWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_live_flash
+    plug :fetch_flash
     plug :put_root_layout, html: {DiscussWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug SetUser
   end
 
   pipeline :api do
@@ -18,6 +20,7 @@ defmodule DiscussWeb.Router do
     pipe_through :browser
 
     # a route param called idp which can be any IDP your app supports
+    get "/logout", AuthController, :logout
     get "/:idp", AuthController, :request
     get "/:idp/callback", AuthController, :callback
   end
@@ -26,6 +29,8 @@ defmodule DiscussWeb.Router do
     pipe_through :browser
 
     get "/", TopicController, :index
+    get "/topics/new", TopicController, :new
+    post "/topics/new", TopicController, :create
   end
 
   # Other scopes may use custom stacks.

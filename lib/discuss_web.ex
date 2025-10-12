@@ -73,6 +73,8 @@ defmodule DiscussWeb do
       # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+      import Phoenix.Flash, only: [get: 2]
+      import DiscussWeb.FlashComponents, only: [flash: 1]
 
       # Include general helpers for rendering HTML
       unquote(html_helpers())
@@ -84,7 +86,7 @@ defmodule DiscussWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
-      import DiscussWeb.CoreComponents
+      import DiscussWeb.CoreComponents, except: [flash: 1, flash_group: 1]
       import DiscussWeb.Gettext
 
       # Shortcut for generating JS commands
