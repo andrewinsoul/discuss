@@ -54,12 +54,11 @@ defmodule DiscussWeb.TopicController do
 
   def update(conn, %{"id" => id, "topic" => topic_params}) do
     topic = Forum.get_topic!(id)
-
     case Forum.update_topic(topic, topic_params) do
       {:ok, topic} ->
         conn
         |> put_flash(:info, "Topic updated successfully.")
-        |> redirect(to: ~p"/topics/#{topic}")
+        |> redirect(to: ~p"/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :edit, topic: topic, changeset: changeset)

@@ -1,9 +1,16 @@
-<.simple_form :let={f} for={@changeset} action={@action}>
+<.simple_form
+  :let={f}
+  for={@changeset}
+  action={@action}
+  method={Map.get(assigns, :method, "post")}
+>
   <.error :if={@changeset.action}>
     Oops, something went wrong! Please check the errors below.
   </.error>
   <.input field={f[:title]} type="text" label="Title" />
   <:actions>
-    <.button class="!bg-blue-600" type="submit">Save Topic</.button>
+    <.button class="!bg-blue-600" type="submit">
+      {Map.get(assigns, :btn_text, "Save Topic")}
+    </.button>
   </:actions>
 </.simple_form>

@@ -1,8 +1,13 @@
 <.header>
-  Edit Topic {@topic.id}
+  Edit Topic
   <:subtitle>Use this form to manage topic records in your database.</:subtitle>
 </.header>
 
-<.topic_form changeset={@changeset} action={~p"/topics/#{@topic}"} />
+<.topic_form
+  btn_text="Edit Topic"
+  changeset={@changeset}
+  action={~p"/topics/#{@topic}"}
+  method="put"
+/>
 
-<.back navigate={~p"/topics"}>Back to topics</.back>
+<.back navigate={~p"/"}>Back to topics</.back>
