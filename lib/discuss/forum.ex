@@ -4,9 +4,12 @@ defmodule Discuss.Forum do
   """
 
   import Ecto.Query, warn: false
+  import Discuss.Util.KeysetCursor
   alias Discuss.Repo
 
   alias Discuss.Forum.Topic
+
+  @default_page_size 10
 
   @doc """
   Returns the list of topics.
@@ -17,8 +20,78 @@ defmodule Discuss.Forum do
       [%Topic{}, ...]
 
   """
-  def list_topics do
-    Repo.all(Topic)
+  def list_topics(opts \\ []) do
+    page_size = opts[:page_size] || @default_page_size
+    limit = page_size + 1
+    after_cursor = decode_cursor(opts[:after])
+    before_cursor = decode_cursor(opts[:before])
+
+    # => {ts, id} | nil
+    decoded = decode_cursor(opts[:after])
+
+    base_query =
+      from t in Topic,
+        order_by: [desc: t.inserted_at, desc: t.id]
+
+    cond do
+      after_cursor ->
+        {ts, id} = after_cursor
+
+        query =
+          from t in base_query,
+            where: t.inserted_at < ^ts or (t.inserted_at == ^ts and t.id < ^id),
+            limit: ^limit
+
+        items_full = Repo.all(query)
+        {items, has_more} = trim(items_full, page_size)
+
+        %{
+          items: items,
+          next_cursor: if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
+          # we came from somewhere, allow going back
+          prev_cursor: encode_cursor(extract_struct_value(List.first(items))),
+          page_size: page_size
+        }
+
+      before_cursor ->
+        {ts, id} = before_cursor
+
+        query =
+          from t in Topic,
+            where:
+              t.inserted_at > ^ts or
+                (t.inserted_at == ^ts and t.id > ^id),
+            order_by: [asc: t.inserted_at, asc: t.id],
+            limit: ^limit
+
+        items_full = Repo.all(query)
+        {asc_slice, has_more_newer} = trim(items_full, page_size)
+        items = Enum.reverse(asc_slice)
+
+        %{
+          items: items,
+          # older
+          next_cursor: encode_cursor(extract_struct_value(List.last(items))),
+          prev_cursor:
+            if(has_more_newer, do: encode_cursor(extract_struct_value(List.first(items))), else: nil),
+          page_size: page_size
+        }
+
+      true ->
+        query =
+          from t in base_query,
+            limit: ^limit
+
+        items_full = Repo.all(query)
+        {items, has_more} = trim(items_full, page_size)
+
+        %{
+          items: items,
+          next_cursor: if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
+          prev_cursor: nil,
+          page_size: page_size
+        }
+    end
   end
 
   @doc """
@@ -49,12 +122,21 @@ defmodule Discuss.Forum do
       {:error, %Ecto.Changeset{}}
 
   """
-  # Context
   def create_topic(attrs \\ %{}, user) do
     user
     |> Ecto.build_assoc(:topics, attrs)
     |> Repo.insert()
   end
+
+  # same solution with put_assoc
+  # def create_topic(attrs \\ %{}, user_info) do
+  #   user = user_info |> Repo.preload(:topics)
+  #   attrs_changeset = Topic.changeset(%Topic{}, attrs)
+  #   user_changeset =
+  #     user |> Ecto.Changeset.change() |> Ecto.Changeset.put_assoc(:topics, [attrs_changeset | user.topics])
+
+  #   Repo.update(user_changeset)
+  # end
 
   @doc """
   Updates a topic.
