@@ -1,5 +1,5 @@
 defmodule DiscussWeb.Router do
-  alias DiscussWeb.Plugs.SetUser
+  alias DiscussWeb.Plugs.{SetUser, RequireAuth}
   use DiscussWeb, :router
 
   pipeline :browser do
@@ -16,6 +16,11 @@ defmodule DiscussWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :require_auth do
+    # Protect routes that require auth
+    plug RequireAuth
+  end
+
   scope "/auth", DiscussWeb do
     pipe_through :browser
 
@@ -27,8 +32,12 @@ defmodule DiscussWeb.Router do
 
   scope "/", DiscussWeb do
     pipe_through :browser
-
     get "/", TopicController, :index
+  end
+
+  scope "/", DiscussWeb do
+    pipe_through [:browser, :require_auth]
+
     get "/topics/new", TopicController, :new
     post "/topics/new", TopicController, :create
   end
