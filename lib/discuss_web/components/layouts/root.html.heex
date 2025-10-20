@@ -28,7 +28,7 @@
     <% end %>
 
     <%= if error = get(@flash, :error) do %>
-      <.flash message={error} kind={:error} />
+      <.flash id="err-msg" message={error} kind={:error} />
     <% end %>
 
     <%= @inner_content %>
