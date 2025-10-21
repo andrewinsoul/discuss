@@ -3,9 +3,9 @@ defmodule DiscussWeb.TopicController do
 
   alias Discuss.Forum
   alias Discuss.Forum.Topic
+  alias Discuss.Forum.Comment
 
   def index(conn, params) do
-
     %{
       items: topics,
       next_cursor: next_cursor,
@@ -26,11 +26,11 @@ defmodule DiscussWeb.TopicController do
     user = conn.assigns[:user]
 
     case Forum.create_topic(
-      %{
-        title: topic_params["title"]
-      },
-      user
-    ) do
+           %{
+             title: topic_params["title"]
+           },
+           user
+         ) do
       {:ok, topic} ->
         conn
         |> put_flash(:info, "Topic created successfully.")
@@ -41,9 +41,68 @@ defmodule DiscussWeb.TopicController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    topic = Forum.get_topic!(id)
-    render(conn, :show, topic: topic)
+  def show(conn, %{"id" => topic_id} = params) do
+    topic = Forum.get_topic!(topic_id)
+    comment_changeset = Forum.change_comment(%Comment{})
+
+    %{
+      items: comments,
+      next_cursor: next_cursor,
+      prev_cursor: prev_cursor,
+      page_size: page_size
+    } =
+      Forum.list_topic_comments(
+        topic_id: topic_id,
+        after: params["after"],
+        before: params["before"]
+      )
+
+    conn
+    |> render(
+      :show,
+      topic: topic,
+      changeset: comment_changeset,
+      comments: comments,
+      next_cursor: next_cursor,
+      prev_cursor: prev_cursor
+    )
+  end
+
+  defp show_topic_comments(conn, %{"topic_id" => id} = params) do
+    %{
+      items: comments,
+      next_cursor: next_cursor,
+      prev_cursor: prev_cursor,
+      page_size: page_size
+    } =
+      Forum.list_topic_comments(
+        after: params["after"],
+        before: params["before"],
+        topic_id: id
+      )
+  end
+
+  def create_comment(conn, %{"comment" => comment_params, "topic_id" => topic_id}) do
+    user = conn.assigns[:user]
+    payload = comment_params |> Map.put_new("topic_id", topic_id)
+
+    case Forum.create_comment(payload, user) do
+      {:ok, comment} ->
+        conn
+        |> redirect(to: ~p"/topics/#{topic_id}")
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        topic = Forum.get_topic!(topic_id)
+        result = show_topic_comments(conn, %{"topic_id" => topic_id})
+
+        render(conn, :show,
+          changeset: changeset,
+          comments: result.items,
+          topic: topic,
+          next_cursor: result.next_cursor,
+          prev_cursor: result.prev_cursor
+        )
+    end
   end
 
   def edit(conn, %{"id" => id}) do
@@ -54,6 +113,7 @@ defmodule DiscussWeb.TopicController do
 
   def update(conn, %{"id" => id, "topic" => topic_params}) do
     topic = Forum.get_topic!(id)
+
     case Forum.update_topic(topic, topic_params) do
       {:ok, topic} ->
         conn

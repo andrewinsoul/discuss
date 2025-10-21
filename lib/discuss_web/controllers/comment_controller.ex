@@ -14,18 +14,6 @@ defmodule DiscussWeb.CommentController do
     render(conn, :new, changeset: changeset)
   end
 
-  def create(conn, %{"comment" => comment_params}) do
-    case Forum.create_comment(comment_params) do
-      {:ok, comment} ->
-        conn
-        |> put_flash(:info, "Comment created successfully.")
-        |> redirect(to: ~p"/comments/#{comment}")
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
-    end
-  end
-
   def show(conn, %{"id" => id}) do
     comment = Forum.get_comment!(id)
     render(conn, :show, comment: comment)

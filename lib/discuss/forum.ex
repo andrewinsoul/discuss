@@ -8,6 +8,8 @@ defmodule Discuss.Forum do
   alias Discuss.Repo
 
   alias Discuss.Forum.Topic
+  alias Discuss.Forum.Comment
+  alias Discuss.Account.User
 
   @default_page_size 10
 
@@ -47,7 +49,8 @@ defmodule Discuss.Forum do
 
         %{
           items: items,
-          next_cursor: if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
+          next_cursor:
+            if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
           # we came from somewhere, allow going back
           prev_cursor: encode_cursor(extract_struct_value(List.first(items))),
           page_size: page_size
@@ -73,7 +76,10 @@ defmodule Discuss.Forum do
           # older
           next_cursor: encode_cursor(extract_struct_value(List.last(items))),
           prev_cursor:
-            if(has_more_newer, do: encode_cursor(extract_struct_value(List.first(items))), else: nil),
+            if(has_more_newer,
+              do: encode_cursor(extract_struct_value(List.first(items))),
+              else: nil
+            ),
           page_size: page_size
         }
 
@@ -87,7 +93,95 @@ defmodule Discuss.Forum do
 
         %{
           items: items,
-          next_cursor: if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
+          next_cursor:
+            if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
+          prev_cursor: nil,
+          page_size: page_size
+        }
+    end
+  end
+
+  def list_topic_comments(opts \\ []) do
+    page_size = opts[:page_size] || @default_page_size
+    topic_id = opts[:topic_id]
+    limit = page_size + 1
+    after_cursor = decode_cursor(opts[:after])
+    before_cursor = decode_cursor(opts[:before])
+
+    # => {ts, id} | nil
+    decoded = decode_cursor(opts[:after])
+
+    base_query =
+      from c in Comment,
+        join: u in User,
+        on: c.user_id == u.id,
+        preload: [user: u],
+        order_by: [desc: c.inserted_at, desc: c.id]
+
+    cond do
+      after_cursor ->
+        {ts, id} = after_cursor
+
+        query =
+          from c in base_query,
+            where:
+              (c.inserted_at < ^ts or (c.inserted_at == ^ts and c.id < ^id)) and
+                c.topic_id == ^topic_id,
+            limit: ^limit
+
+        items_full = Repo.all(query)
+        {items, has_more} = trim(items_full, page_size)
+
+        %{
+          items: items,
+          next_cursor:
+            if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
+          # we came from somewhere, allow going back
+          prev_cursor: encode_cursor(extract_struct_value(List.first(items))),
+          page_size: page_size
+        }
+
+      before_cursor ->
+        {ts, id} = before_cursor
+
+        query =
+          from c in base_query,
+            where:
+              (c.inserted_at > ^ts or
+                 (c.inserted_at == ^ts and c.id > ^id)) and
+                c.topic_id == ^topic_id,
+            order_by: [asc: c.inserted_at, asc: c.id],
+            limit: ^limit
+
+        items_full = Repo.all(query)
+        {asc_slice, has_more_newer} = trim(items_full, page_size)
+        items = Enum.reverse(asc_slice)
+
+        %{
+          items: items,
+          # older
+          next_cursor: encode_cursor(extract_struct_value(List.last(items))),
+          prev_cursor:
+            if(has_more_newer,
+              do: encode_cursor(extract_struct_value(List.first(items))),
+              else: nil
+            ),
+          page_size: page_size
+        }
+
+      true ->
+        query =
+          from c in base_query,
+            where: c.topic_id == ^topic_id,
+            limit: ^limit
+
+        items_full = Repo.all(query)
+        {items, has_more} = trim(items_full, page_size)
+
+        %{
+          items: items,
+          next_cursor:
+            if(has_more, do: encode_cursor(extract_struct_value(List.last(items))), else: nil),
           prev_cursor: nil,
           page_size: page_size
         }
@@ -228,8 +322,9 @@ defmodule Discuss.Forum do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_comment(attrs \\ %{}) do
-    %Comment{}
+  def create_comment(attrs \\ %{}, user) do
+    user
+    |> Ecto.build_assoc(:comments, attrs)
     |> Comment.changeset(attrs)
     |> Repo.insert()
   end
