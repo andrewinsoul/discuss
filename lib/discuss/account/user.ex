@@ -2,6 +2,8 @@ defmodule Discuss.Account.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:username, :email]}
+
   schema "users" do
     field :token, :string
     field :username, :string
@@ -18,7 +20,7 @@ defmodule Discuss.Account.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :email, :provider, :token])
-    |> validate_required([:username, :email, :provider, :token])
+    |> validate_required([:username, :provider, :token])
     |> unique_constraint(:email)
     |> unique_constraint(:username)
   end

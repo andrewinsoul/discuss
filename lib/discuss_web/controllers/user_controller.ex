@@ -16,10 +16,10 @@ defmodule DiscussWeb.UserController do
 
   def create(conn, %{"user" => user_params}) do
     case Account.create_user(user_params) do
-      {:ok, user} ->
+      {:ok, _user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> redirect(to: ~p"/users/#{user}")
+        |> redirect(to: ~p"/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)
@@ -41,10 +41,10 @@ defmodule DiscussWeb.UserController do
     user = Account.get_user!(id)
 
     case Account.update_user(user, user_params) do
-      {:ok, user} ->
+      {:ok, _user} ->
         conn
         |> put_flash(:info, "User updated successfully.")
-        |> redirect(to: ~p"/users/#{user}")
+        |> redirect(to: ~p"/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :edit, user: user, changeset: changeset)
@@ -57,6 +57,6 @@ defmodule DiscussWeb.UserController do
 
     conn
     |> put_flash(:info, "User deleted successfully.")
-    |> redirect(to: ~p"/users")
+    |> redirect(to: ~p"/")
   end
 end

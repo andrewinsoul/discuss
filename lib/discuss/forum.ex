@@ -29,7 +29,7 @@ defmodule Discuss.Forum do
     before_cursor = decode_cursor(opts[:before])
 
     # => {ts, id} | nil
-    decoded = decode_cursor(opts[:after])
+    # decoded = decode_cursor(opts[:after])
 
     base_query =
       from t in Topic,
@@ -107,9 +107,6 @@ defmodule Discuss.Forum do
     limit = page_size + 1
     after_cursor = decode_cursor(opts[:after])
     before_cursor = decode_cursor(opts[:before])
-
-    # => {ts, id} | nil
-    decoded = decode_cursor(opts[:after])
 
     base_query =
       from c in Comment,
@@ -327,6 +324,10 @@ defmodule Discuss.Forum do
     |> Ecto.build_assoc(:comments, attrs)
     |> Comment.changeset(attrs)
     |> Repo.insert()
+    |> then(fn
+      {:ok, comment} -> {:ok, Repo.preload(comment, :user)}
+      {:error, changeset} -> {:error, changeset}
+    end)
   end
 
   @doc """
