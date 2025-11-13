@@ -22,23 +22,33 @@
       <:col :let={topic} label="Title">
         <.link navigate={~p"/topics/#{topic}"}><%= topic.title %></.link>
       </:col>
+
       <:action :let={topic}>
-        <div class="sr-only">
-          <.link navigate={~p"/topics/#{topic}"}>Show</.link>
-        </div>
-        <.link navigate={~p"/topics/#{topic}/edit"}>Edit</.link>
+        <%= if user = @conn.assigns[:user] do %>
+          <%= if user.id == topic.user_id do %>
+            <div class="sr-only">
+              <.link navigate={~p"/topics/#{topic}"}>Show</.link>
+            </div>
+            <.link navigate={~p"/topics/#{topic}/edit"}>Edit</.link>
+          <% end %>
+        <% end %>
       </:action>
+
       <:action :let={topic}>
-        <form id={"delete-form-#{topic.id}"} action={~p"/topics/#{topic}"} method="post" class="hidden">
-          <input type="hidden" name="_method" value="DELETE">
-          <input type="hidden" name="_csrf_token" value={get_csrf_token()}>
-        </form>
-        <button type="button"
-          data-topic-id={topic.id}
-          onclick="openDeleteModal(this)"
-          class="text-red-600 hover:text-red-900">
-            Delete
-        </button>
+        <%= if user = @conn.assigns[:user] do %>
+          <%= if user.id == topic.user_id do %>
+            <form id={"delete-form-#{topic.id}"} action={~p"/topics/#{topic}"} method="post" class="hidden">
+              <input type="hidden" name="_method" value="DELETE">
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()}>
+            </form>
+            <button type="button"
+              data-topic-id={topic.id}
+              onclick="openDeleteModal(this)"
+              class="text-red-600 hover:text-red-900">
+                Delete
+            </button>
+          <% end %>
+        <% end %>
       </:action>
     </.table>
     <div class="flex gap-4 mt-4">
