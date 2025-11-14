@@ -14,7 +14,7 @@
 //
 //     import "some-package"
 //
-
+import './user_socket'
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
@@ -41,6 +41,7 @@ import "phoenix_html"
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 // window.liveSocket = liveSocket
+import "./show_topic.js";
 
 window.openModal = function openModal(id) {
     const modal = document.getElementById(id);

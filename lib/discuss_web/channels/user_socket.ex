@@ -1,6 +1,5 @@
 defmodule DiscussWeb.UserSocket do
   use Phoenix.Socket
-  import Plug.Conn, only: [get_session: 2]
 
   # A Socket handler
   #
@@ -26,9 +25,16 @@ defmodule DiscussWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(_params, socket, connect_info) do
-    user_id = get_session(connect_info, :user_id)
-    {:ok, assign(socket, :user_id, user_id)}
+  def connect(%{"token" => token}, socket, _connect_info) do
+    with {:ok, user_id} <- Phoenix.Token.verify(DiscussWeb.Endpoint, "user salt", token) do
+      {:ok, assign(socket, :user_id, user_id)}
+    else
+      {:error, :invalid} ->
+        {:ok, socket}
+
+      _ ->
+        :error
+    end
   end
 
   # Socket IDs are topics that allow you to identify all sockets for a given user:

@@ -25,26 +25,12 @@ defmodule DiscussWeb.CommentController do
     render(conn, :edit, comment: comment, changeset: changeset)
   end
 
-  def update(conn, %{"id" => id, "comment" => comment_params}) do
-    comment = Forum.get_comment!(id)
-
-    case Forum.update_comment(comment, comment_params) do
-      {:ok, comment} ->
-        conn
-        |> put_flash(:info, "Comment updated successfully.")
-        |> redirect(to: ~p"/comments/#{comment}")
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, comment: comment, changeset: changeset)
-    end
-  end
-
   def delete(conn, %{"id" => id}) do
     comment = Forum.get_comment!(id)
     {:ok, _comment} = Forum.delete_comment(comment)
 
     conn
     |> put_flash(:info, "Comment deleted successfully.")
-    |> redirect(to: ~p"/comments")
+    |> redirect(to: ~p"/")
   end
 end
