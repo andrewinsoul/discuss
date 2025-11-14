@@ -84,7 +84,7 @@ defmodule DiscussWeb.TopicController do
       comment_params
       |> Map.put_new("topic_id", topic_id)
       |> Map.put("inserted_at", NaiveDateTime.local_now() |> DateTime.from_naive!("Etc/UTC"))
-IO.inspect(payload, label: "XXXXXXXXXXXXXXXXXXX <>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>< ")
+
     case Forum.create_comment(payload, user) do
       {:ok, _comment} ->
         conn
