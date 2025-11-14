@@ -10,7 +10,7 @@ defmodule DiscussWeb.TopicController do
       items: topics,
       next_cursor: next_cursor,
       prev_cursor: prev_cursor,
-      page_size: page_size
+      page_size: _page_size
     } =
       Forum.list_topics(after: params["after"], before: params["before"])
 
@@ -31,7 +31,7 @@ defmodule DiscussWeb.TopicController do
            },
            user
          ) do
-      {:ok, topic} ->
+      {:ok, _topic} ->
         conn
         |> put_flash(:info, "Topic created successfully.")
         |> redirect(to: ~p"/")
@@ -64,30 +64,29 @@ defmodule DiscussWeb.TopicController do
       changeset: comment_changeset,
       comments: comments,
       next_cursor: next_cursor,
-      prev_cursor: prev_cursor
+      prev_cursor: prev_cursor,
+      page_size: page_size
     )
   end
 
-  defp show_topic_comments(conn, %{"topic_id" => id} = params) do
-    %{
-      items: comments,
-      next_cursor: next_cursor,
-      prev_cursor: prev_cursor,
-      page_size: page_size
-    } =
-      Forum.list_topic_comments(
-        after: params["after"],
-        before: params["before"],
-        topic_id: id
-      )
+  defp show_topic_comments(_conn, %{"topic_id" => id} = params) do
+    Forum.list_topic_comments(
+      after: params["after"],
+      before: params["before"],
+      topic_id: id
+    )
   end
 
   def create_comment(conn, %{"comment" => comment_params, "topic_id" => topic_id}) do
     user = conn.assigns[:user]
-    payload = comment_params |> Map.put_new("topic_id", topic_id)
 
+    payload =
+      comment_params
+      |> Map.put_new("topic_id", topic_id)
+      |> Map.put("inserted_at", NaiveDateTime.local_now() |> DateTime.from_naive!("Etc/UTC"))
+IO.inspect(payload, label: "XXXXXXXXXXXXXXXXXXX <>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>< ")
     case Forum.create_comment(payload, user) do
-      {:ok, comment} ->
+      {:ok, _comment} ->
         conn
         |> redirect(to: ~p"/topics/#{topic_id}")
 
@@ -115,7 +114,7 @@ defmodule DiscussWeb.TopicController do
     topic = Forum.get_topic!(id)
 
     case Forum.update_topic(topic, topic_params) do
-      {:ok, topic} ->
+      {:ok, _topic} ->
         conn
         |> put_flash(:info, "Topic updated successfully.")
         |> redirect(to: ~p"/")

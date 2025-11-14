@@ -19,7 +19,7 @@ defmodule DiscussWeb.AuthController do
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, %{"idp" => provider} = _params) do
     user_params = %{
       token: auth.credentials.token,
-      email: auth.info.email,
+      email: auth.info.email || "",
       username:
         auth.info.nickname ||
           "#{String.split(auth.info.email, "@") |> hd}#{System.system_time(:millisecond)}",

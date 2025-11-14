@@ -2,6 +2,8 @@ defmodule Discuss.Forum.Comment do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:content, :inserted_at, :user]}
+
   schema "comments" do
     field :content, :string
 

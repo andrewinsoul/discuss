@@ -2,11 +2,17 @@
 // you uncomment its entry in "assets/js/app.js".
 
 // Bring in Phoenix channels client library:
-import {Socket} from "phoenix"
+import { Socket } from "phoenix"
+// import dayjs from "dayjs";
+// import relativeTime from "dayjs/plugin/relativeTime";
+// import advancedFormat from "dayjs/plugin/advancedFormat";
+
+// dayjs.extend(relativeTime);
+// dayjs.extend(advancedFormat)
 
 // And connect to the path in "lib/discuss_web/endpoint.ex". We pass the
 // token for authentication. Read below how it should be used.
-let socket = new Socket("/socket", {params: {token: window.userToken}})
+let socket = new Socket("/socket", { params: { token: window.userToken } })
 
 // When you connect, you'll often need to authenticate the client.
 // For example, imagine you have an authentication plug, `MyAuth`,
@@ -53,12 +59,50 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 // Finally, connect to the socket:
 socket.connect()
 
-// Now that you are connected, you can join channels with a topic.
-// Let's assume you have a channel with a topic named `room` and the
-// subtopic is its id - in this case 42:
-let channel = socket.channel("room:42", {})
-channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
-  .receive("error", resp => { console.log("Unable to join", resp) })
+
+const createCommentSocket = (topicId) => {
+  const channel = socket.channel(`comment:${topicId}`, {});
+  channel
+    .join()
+    .receive("ok", (_resp) => {
+      console.log('successfully joined comment channel for real time update!');
+
+    })
+    .receive("error", (resp) => {
+      console.log("Unable to join", resp);
+    });
+
+  channel.on(`comment:${topicId}:new`, async (response) => {
+    // const dateCommentWasCreated = formatDateCommentWasCreated(
+    //   response.comment.inserted_at
+    // );
+    const dateCommentWasCreated = response.comment.inserted_at
+    if (document.querySelector("textarea")) document.querySelector("textarea").value = ""
+    document.getElementById("comment-list").innerHTML += `
+    <div class="border-b border-gray-200 pb-4 last:pb-12 last:mb-20">
+      <p>${response.comment.content}</p>
+      <small>By ${response.comment.user.username} ${dateCommentWasCreated}</small>
+    </div>`;
+    const box = document.getElementById("comment-list");
+    box.scrollTop = box.scrollHeight;
+    requestAnimationFrame(() => {
+      box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' })
+    });
+  });
+  return channel
+};
+
+// const checkIsOlderThanWeek = (date) => {
+//   const now = dayjs();
+//   return now.diff(date, "week") >= 1;
+// };
+
+// const formatDateCommentWasCreated = (date) => {
+//   return checkIsOlderThanWeek(date)
+//     ? dayjs(date).format("Do MMMM, YYYY HH:mm")
+//     : dayjs(date).fromNow();
+// };
+
+window.createCommentSocket = createCommentSocket;
 
 export default socket

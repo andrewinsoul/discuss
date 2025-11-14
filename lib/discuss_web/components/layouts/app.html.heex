@@ -27,4 +27,9 @@
   <div class="lg:mx-auto lg:max-w-2xl lg:w-full mx-[1%] w-[98%] max-w-[98%]">
     <%= @inner_content %>
   </div>
+  <%= if @conn.assigns[:user] do %>
+    <script>
+      window.userToken = "<%= Phoenix.Token.sign(@conn, "user salt", @conn.assigns[:user]) %>"
+    </script>
+  <% end %>
 </main>

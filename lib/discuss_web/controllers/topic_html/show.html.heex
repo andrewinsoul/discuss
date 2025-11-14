@@ -9,72 +9,73 @@
   </:actions>
 </.header>
 
-<div>
-  <div class="relative">
-    <div class="flex justify-between items-center">
-      <h3 class="font-bold text-lg text-center my-4">{@topic.title}</h3>
-      <div class="flex gap-2">
-        <%= if @prev_cursor do %>
-          <.link patch={~p"/topics/#{@topic}?before=#{@prev_cursor}"} class="flex items-center gap-2 bg-transparent hover:bg-gray-100 p-2 rounded-md">
-            <i data-lucide="arrow-left" class="w-4 h-4 text-gray-700"></i>
-            <p class="text-gray-700">Prev</p>
-          </.link>
-        <% end %>
-        <%= if @next_cursor do %>
-          <.link patch={~p"/topics/#{@topic}?after=#{@next_cursor}"} class="flex items-center gap-2 bg-transparent hover:bg-gray-100 p-2 rounded-md">
-            <i data-lucide="arrow-right" class="w-4 h-4 text-gray-700"></i>
-            <p class="text-gray-700">Next</p>
-          </.link>
-        <% end %>
-      </div>
-    </div>
-    <section class="flex flex-col gap-4 h-[60vh] overflow-y-auto">
-      <%= if Enum.empty?(@comments) do %>
-        <div class="h-[70vh] flex flex-col justify-center items-center">
-          <i data-lucide="message-circle-code" class="w-20 h-20 text-blue-500"></i>
-          <p class="text-lg">No Discussions on this topic yet...</p>
-        </div>
-      <% else %>
-        <%= for comment <- @comments do %>
-          <div class="border-b border-gray-200 pb-4 last:pb-12 last:mb-20">
-            <p>{comment.content}</p>
-            <small>{"By #{comment.user.username} on #{comment.inserted_at}"}</small>
-          </div>
-        <% end %>
-      <% end %>
-    </section>
-    <%
-      border_class = "border-gray-600"
-    %>
-    <%= if @conn.assigns[:user] do %>
-      <.form
-        :let={f}
-        for={@changeset}
-        method="post"
-        action={~p"/comments/topic/#{@topic}"}
-        class={"absolute bottom-0 left-0 right-0 h-[10vh] bg-white border rounded-md flex items-center gap-4 pr-4 pl-1 #{border_class}"}>
-          <div class="flex-1 min-w-0 py-2 relative">
-            <textarea
-              id={f[:content].id}
-              name={f[:content].name}
-              placeholder="What's your thoughts?..."
-              maxlength="2000"
-              class="w-full resize-none border-none focus:outline-none focus:ring-0 block"
-            ><%= f[:content].value || "" %></textarea>
-            <!--
-            <div class="absolute top-[4.5rem]">
-              <.error><%= elem(@changeset.errors[:content], 0) %></.error>
-            </div>
-            -->
-          </div>
 
-          <button
-            type="submit"
-            class="rounded-full bg-blue-700 w-[50px] h-[50px] flex justify-center items-center shrink-0"
-          >
-            <i data-lucide="send" class="w-6 h-6 font-bold text-white"></i>
-          </button>
-      </.form>
-    <% end %>
+<main class="relative" data-topic-id={@topic.id}>
+  <div class="flex justify-between items-center">
+    <h3 class="font-bold text-lg text-center my-4"><%= @topic.title %></h3>
+    <div class="flex gap-2">
+      <%= if @prev_cursor do %>
+        <.link patch={~p"/topics/#{@topic}?before=#{@prev_cursor}"} class="flex items-center gap-2 bg-transparent hover:bg-gray-100 p-2 rounded-md">
+          <i data-lucide="arrow-left" class="w-4 h-4 text-gray-700"></i>
+          <p class="text-gray-700">Prev</p>
+        </.link>
+      <% end %>
+      <%= if @next_cursor do %>
+        <.link patch={~p"/topics/#{@topic}?after=#{@next_cursor}"} class="flex items-center gap-2 bg-transparent hover:bg-gray-100 p-2 rounded-md">
+          <i data-lucide="arrow-right" class="w-4 h-4 text-gray-700"></i>
+          <p class="text-gray-700">Next</p>
+        </.link>
+      <% end %>
+    </div>
   </div>
-</div>
+  <section id="comment-list" class="flex flex-col gap-4 h-[60vh] overflow-y-auto">
+    <%= if Enum.empty?(@comments) do %>
+      <div class="h-[70vh] flex flex-col justify-center items-center">
+        <i data-lucide="message-circle-code" class="w-20 h-20 text-blue-500"></i>
+        <p class="text-lg">No Discussions on this topic yet...</p>
+      </div>
+    <% else %>
+      <%= for comment <- @comments do %>
+        <div class="border-b border-gray-200 pb-4 last:pb-12 last:mb-20">
+          <p>
+            <%= comment.content %>
+          </p>
+          <small>By <%= comment.user.username %> on <%= comment.inserted_at %></small>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+  <%
+    border_class = "border-gray-600"
+  %>
+  <%= if @conn.assigns[:user] do %>
+    <.form
+      :let={f}
+      for={@changeset}
+      class={"absolute bottom-0 left-0 right-0 h-[10vh] bg-white border rounded-md flex items-center gap-4 pr-4 pl-1 #{border_class}"}>
+        <div class="flex-1 min-w-0 py-2 relative">
+          <textarea
+            id={f[:content].id}
+            name={f[:content].name}
+            placeholder="What's your thoughts?..."
+            maxlength="2000"
+            class="w-full resize-none border-none focus:outline-none focus:ring-0 block"
+          ><%= f[:content].value || "" %></textarea>
+          <div class="absolute top-[4.5rem]">
+            <div id="error-msg-cont" style="display:none" class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+              <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
+              <div id="error-msg"></div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="add-comment-btn"
+          class="rounded-full bg-blue-700 w-[50px] h-[50px] flex justify-center items-center shrink-0"
+        >
+          <i data-lucide="send" class="w-6 h-6 font-bold text-white"></i>
+        </button>
+    </.form>
+  <% end %>
+</main>
